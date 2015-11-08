@@ -14,7 +14,7 @@ function mdrgmModel() {
     self.client.disconnect();
     self.log.push("Disconnected");}
   self.status = function() {
-    message = new Paho.MQTT.Message("Hello");
+    message = new Paho.MQTT.Message("{name = '" + self.clientID() + "', status='ready'}");
     message.destinationName = "E14_TM_Q/Status";
     self.client.send(message);
   }
