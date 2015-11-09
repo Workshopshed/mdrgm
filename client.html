@@ -62,7 +62,7 @@
           <h3 class="panel-title">Queue Connection</h3>
         </div>
         <div class="panel-body">
-          <p>ClientID: <span data-bind="text: clientID" /></p>
+          <p>ClientID: <span data-bind="text: clientID" ></span></p>
           <button class="btn btn-success" type="button" data-bind="click: connect">Connect</button>
           <button class="btn btn-warning" type="button" data-bind="click: disconnect">Disconnect</button>
         </div>
@@ -74,7 +74,7 @@
           <h3 class="panel-title">Send Messages</h3>
         </div>
         <div class="panel-body">
-          <button class="btn btn-primary" type="button" data-bind="click: status">Status</button>
+          <button class="btn btn-primary" type="button" data-bind="click: ready">Ready</button>
           <button class="btn btn-primary" type="button" data-bind="click: run">Run</button>
         </div>
       </div>
@@ -82,16 +82,34 @@
       </div>
       <div class="row">
         <div class="col-sm-6">
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <h3 class="panel-title">Received messages</h3>
-        </div>
-        <div class="panel-body">
-          <div data-bind="foreach: log">
-            <p data-bind="text: $data"> </p>
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Received messages</h3>
+                </div>
+                <div class="panel-body">
+                  <div data-bind="foreach: log">
+                    <p data-bind="text: $data"> </p>
+                  </div>
+                </div>
+              </div>
           </div>
-        </div>
-      </div>
+          <div class="col-sm-6">
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Registered Machines</h3>
+                </div>
+                <div class="panel-body">
+                  <table class="table table-bordered table-striped">
+                      <thead><tr><th>Name:</th><th>Status:</th></tr></thead>
+                      <tbody data-bind="foreach: machines">
+                        <tr>
+                             <td data-bind="text: name"></td>
+                             <td data-bind="text: status"></td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </div>
+              </div>
           </div>
       </div>
     </div>

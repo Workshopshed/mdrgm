@@ -3,24 +3,40 @@
  */
 
 function mdrgmModel() {
-  self = this;
-  self.clientID = ko.observable("mdrgm" + parseInt(Math.random() * 100, 10));
-  self.log = ko.observableArray();
+    self = this;
+    self.clientID = ko.observable("mdrgm" + parseInt(Math.random() * 100, 10));
+    self.qStatus = "E14_TM_Q/Status";
+    self.qRun = "E14_TM_Q/Run/" + self.clientID();
+    self.log = ko.observableArray();
+    self.machines = ko.observableArray();
+    self.status = { name : self.clientID, status : "ready" };
 
   //Buttons
   self.connect = function() {
-    self.client.connect({onSuccess:onConnect});}
-  self.disconnect = function() {
-    self.client.disconnect();
-    self.log.push("Disconnected");}
-  self.status = function() {
-    message = new Paho.MQTT.Message("{name = '" + self.clientID() + "', status='ready'}");
-    message.destinationName = "E14_TM_Q/Status";
-    self.client.send(message);
+    self.client.connect({onSuccess:self.onConnect});}
+  self.disconnect = function () {
+      self.setstatus("disconnected", false);
+      self.client.disconnect();
+      self.log.push("Disconnected");
+      self.machines.removeAll();
   }
+
+  self.ready = function () {
+      self.setstatus("ready", true);
+      self.client.send(message);
+  }
+
+  self.setstatus = function (status, retained) {
+      self.status.status = status;
+      message = new Paho.MQTT.Message(ko.toJSON(self.status));
+      message.retained = retained;
+      message.destinationName = self.qStatus;
+      self.client.send(message);
+  }
+
   self.run = function() {
     message = new Paho.MQTT.Message("Run");
-    message.destinationName = "E14_TM_Q/Run/" + self.clientID();
+    message.destinationName = self.qRun;
     self.client.send(message);
   }
 
@@ -33,20 +49,49 @@ function mdrgmModel() {
       if (responseObject.errorCode !== 0) {
         self.log.push("onConnectionLost:"+responseObject.errorMessage);
       }
-    };
+  };
+
+  function arrayObjectIndexOf(myArray, searchTerm, property) {
+      for (var i = 0, len = myArray.length; i < len; i++) {
+          if (myArray[i][property] === searchTerm) return i;
+      }
+      return -1;
+  }
 
   self.client.onMessageArrived = function (message) {
-    self.log.push(message.payloadString);
-    console.log("onMessageArrived:" + message.payloadString);
+      self.log.push(message.destinationName);
+      self.log.push(message.payloadString);
+
+      if (message.destinationName == self.qStatus) {
+          try {
+              var status = jQuery.parseJSON(message.payloadString);
+              if (status.status == "ready") {
+                  if (arrayObjectIndexOf(self.machines(),status.name,"name") == -1) {
+                      self.machines.push(status);
+                  }
+              }
+              if (status.status == "disconnected") {
+                  self.machines.remove(function (item) { return item.name == status.name });
+              }
+          }
+          catch (err) {
+              self.log.push(err.message);
+          }
+      }
+      else {
+          //self.log.push(message.destinationName);
+          //self.log.push(message.payloadString);
+          console.log("onMessageArrived:" + message.payloadString);
+      }
   };
 
 // called when the client connects
-  function onConnect() {
+  self.onConnect = function() {
     // Once a connection has been made, make a subscription and send a message.
     self.log.push("Connected");
     // Note that a machine would just connect to run and a monitor would just connect to status.
-    self.client.subscribe("E14_TM_Q/Status");
-    self.client.subscribe("E14_TM_Q/Run/" + self.clientID());
+    self.client.subscribe(self.qStatus);
+    self.client.subscribe(self.qRun);
   }
 
 }
