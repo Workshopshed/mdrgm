@@ -5,8 +5,8 @@
 function mdrgmModel() {
     self = this;
     self.clientID = ko.observable("mdrgm" + parseInt(Math.random() * 100, 10));
-    self.qStatus = "E14_TM_Q/Status";
-    self.qRun = "E14_TM_Q/Run/" + self.clientID();
+    self.qStatus = "E14_TM_Q/" + self.clientID() + "/Status";
+    self.qRun = "E14_TM_Q/" + self.clientID() + "/Run";
     self.log = ko.observableArray();
     self.machines = ko.observableArray();
     self.status = { name : self.clientID, status : "ready" };
@@ -15,7 +15,7 @@ function mdrgmModel() {
   self.connect = function() {
     self.client.connect({onSuccess:self.onConnect});}
   self.disconnect = function () {
-      self.setstatus("disconnected", false);
+      self.setstatus("disconnected", true);
       self.client.disconnect();
       self.log.push("Disconnected");
       self.machines.removeAll();
@@ -62,7 +62,7 @@ function mdrgmModel() {
       self.log.push(message.destinationName);
       self.log.push(message.payloadString);
 
-      if (message.destinationName == self.qStatus) {
+      if (message.destinationName.indexOf("/Status") > -1) {
           try {
               var status = jQuery.parseJSON(message.payloadString);
               if (status.status == "ready") {
@@ -90,7 +90,7 @@ function mdrgmModel() {
     // Once a connection has been made, make a subscription and send a message.
     self.log.push("Connected");
     // Note that a machine would just connect to run and a monitor would just connect to status.
-    self.client.subscribe(self.qStatus);
+    self.client.subscribe("E14_TM_Q/+/Status");
     self.client.subscribe(self.qRun);
   }
 
