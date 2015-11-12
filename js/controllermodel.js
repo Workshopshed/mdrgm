@@ -47,40 +47,43 @@ function mdrgmModel() {
       return -1;
   }
 
-  self.client.onMessageArrived = function (message) {
-      self.log.push(message.destinationName);
-      self.log.push(message.payloadString);
+      self.client.onMessageArrived = function (message) {
+          self.log.push(message.destinationName);
+          self.log.push(message.payloadString);
 
-      if (message.destinationName.indexOf("/Status") > -1) {
-          try {
-              if (message.payloadString != "") {
-                var machine = jQuery.parseJSON(message.payloadString);
-                if (machine.status == "ready") {
-                  if (arrayObjectIndexOf(self.machines(), machine.name, "name") == -1) {
-                    machine.qRun = "E14_TM_Q/" + machine.name + "/Run";
-                    machine.button = function () {
-                      self.run(machine);
-                    }
-                    self.machines.push(machine);
+              try {
+                  //Split destinaiton into parts.
+                  var parts = message.destinationName.split("/");
+                  if (parts.length == 3) 
+                  {
+                      var clientID = parts[1];
+
+                      //Todo: Make the machine "obserbable so we can change statuses etc
+                      if (message.payloadString != "") {
+                          var machine = jQuery.parseJSON(message.payloadString);
+                          machine.clientID = clientID;
+                          if (machine.status == "ready") {
+                              if (arrayObjectIndexOf(self.machines(), clientID, "name") == -1) {
+                                  machine.qRun = "E14_TM_Q/" + machine.name + "/Run";
+                                  machine.button = function () {
+                                      self.run(machine);
+                                  }
+                                  self.machines.push(machine);
+                              }
+                          }
+                      }
+                      //Empty payload signifies a disconnect
+                      else  {
+                          self.machines.remove(function (item) {
+                              return item.name == clientID
+                          });
+                      }
                   }
-                }
-                if (status.status == "disconnected") {
-                  machine.machines.remove(function (item) {
-                    return item.name == machine.name
-                  });
-                }
               }
-          }
-          catch (err) {
-              self.log.push(err.message);
-          }
-      }
-      else {
-          //self.log.push(message.destinationName);
-          //self.log.push(message.payloadString);
-          console.log("onMessageArrived:" + message.payloadString);
-      }
-  };
+              catch (err) {
+                  self.log.push(err.message);
+              }
+         };
 
 // called when the client connects
   self.onConnect = function() {
