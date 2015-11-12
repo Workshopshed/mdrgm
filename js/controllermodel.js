@@ -4,7 +4,7 @@
 
 function mdrgmModel() {
     self = this;
-    self.clientID = ko.observable("mdrgm" + parseInt(Math.random() * 100, 10));
+    self.clientID = ko.observable("mdrgmController" + parseInt(Math.random() * 100, 10));
     self.log = ko.observableArray();
     self.machines = ko.observableArray();
     self.status = { name : self.clientID, status : "ready" };
@@ -19,22 +19,13 @@ function mdrgmModel() {
       self.machines.removeAll();
   }
 
-  self.ready = function () {
-      self.setstatus("ready", true);
-      self.client.send(message);
-  }
-
   self.setstatus = function (status, retained) {
       self.status.status = status;
-      message = new Paho.MQTT.Message(ko.toJSON(self.status));
-      message.retained = retained;
-      message.destinationName = self.qStatus;
-      self.client.send(message);
   }
 
-  self.run = function() {
+  self.run = function(machine) {
     message = new Paho.MQTT.Message("Run");
-    message.destinationName = self.qRun;
+    message.destinationName = machine.qRun;
     self.client.send(message);
   }
 
@@ -62,17 +53,22 @@ function mdrgmModel() {
 
       if (message.destinationName.indexOf("/Status") > -1) {
           try {
-              var status = jQuery.parseJSON(message.payloadString);
-              if (status.status == "ready") {
-                  if (arrayObjectIndexOf(self.machines(),status.name,"name") == -1) {
-                    //Todo: Add run button here.
-
-
-                      self.machines.push(status);
+              if (message.payloadString != "") {
+                var machine = jQuery.parseJSON(message.payloadString);
+                if (machine.status == "ready") {
+                  if (arrayObjectIndexOf(self.machines(), machine.name, "name") == -1) {
+                    machine.qRun = "E14_TM_Q/" + machine.name + "/Run";
+                    machine.button = function () {
+                      self.run(machine);
+                    }
+                    self.machines.push(machine);
                   }
-              }
-              if (status.status == "disconnected") {
-                  self.machines.remove(function (item) { return item.name == status.name });
+                }
+                if (status.status == "disconnected") {
+                  machine.machines.remove(function (item) {
+                    return item.name == machine.name
+                  });
+                }
               }
           }
           catch (err) {
