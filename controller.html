@@ -47,7 +47,8 @@
   <div class="container theme-showcase" role="main">
 
   <div >
-    <h1>Client</h1>
+    <h1>Controller</h1>
+    <p class="lead">This demo project is to show the protocol and messages in action</p>
 
     <div class="row">
     <div class="col-sm-4">
@@ -62,14 +63,23 @@
         </div>
       </div>
       </div>
-      <div class="col-sm-4">
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <h3 class="panel-title">Send Messages</h3>
-        </div>
-        <div class="panel-body">
-          <button class="btn btn-primary" type="button" data-bind="click: ready">Ready</button>
-          <button class="btn btn-primary" type="button" data-bind="click: run">Run</button>
+      <div class="col-sm-6">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Registered Machines</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table table-bordered table-striped">
+              <thead><tr><th>Name:</th><th>Status:</th></tr></thead>
+              <tbody data-bind="foreach: machines">
+              <tr>
+                <td data-bind="text: name"></td>
+                <td data-bind="text: status"></td>
+                <td data-bind="text: status"></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -87,6 +97,7 @@
                 </div>
               </div>
           </div>
+
       </div>
     </div>
 
@@ -102,6 +113,6 @@
 <!--MQTT Client - https://eclipse.org/paho/clients/js/ -->
 <script src="js/mqttws31.js"></script>
 <!-- My Model -->
-<script src="js/model.js"></script>
+<script src="js/controllermodel.js"></script>
 </body>
 </html>
