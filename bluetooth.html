@@ -1,6 +1,6 @@
 <html>
 <body>
-<p>Test connect to any</p>
+<p>Test connect to all</p>
  <button onclick="dowork()">Click me</button> 
  
 <script>
@@ -9,9 +9,7 @@
  
  document.write('Connect to BlueTooth');
   navigator.bluetooth.requestDevice({   
-  acceptAllDevices: true,
-  optionalServices: ['battery_service']
- 
+  acceptAllDevices: true 
   })
 .then(device => device.gatt.connect())
 .then(server => {
