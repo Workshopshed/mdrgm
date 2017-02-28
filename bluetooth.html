@@ -3,6 +3,8 @@
 <p>Test</p>
  
 <script>
+ document.write('Connect to BlueTooth');
+ 
   navigator.bluetooth.requestDevice({ filters: [{ services: ['battery_service'] }] })
 .then(device => device.gatt.connect())
 .then(server => {
@@ -18,9 +20,9 @@
   return characteristic.readValue();
 })
 .then(value => {
-  console.log('Battery percentage is ' + value.getUint8(0));
+  document.write('Battery percentage is ' + value.getUint8(0));
 })
-.catch(error => { console.log(error); });
+.catch(error => { document.write(error); });
 
   </script>
 </body>
