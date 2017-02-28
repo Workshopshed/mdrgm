@@ -1,12 +1,13 @@
 <html>
 <body>
 <p>Test</p>
+ <button onclick="dowork()">Click me</button> 
  
 <script>
- document.write('Connect to BlueTooth');
+  /* Must be user initiated */
+ function dowork() {
  
- /* Must be user initiated */
- button.addEventListener('pointerup', function(event) {
+ document.write('Connect to BlueTooth');
   navigator.bluetooth.requestDevice({ filters: [{ services: ['battery_service'] }] })
 .then(device => device.gatt.connect())
 .then(server => {
@@ -25,7 +26,7 @@
   document.write('Battery percentage is ' + value.getUint8(0));
 })
 .catch(error => { document.write(error); });
-});
+}
 
   </script>
 </body>
